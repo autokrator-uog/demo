@@ -5,11 +5,20 @@ services:
     build: ./accounts-service
     ports:
       - 5003:5003
+    depends_on:
+      - eventbus
+      - accountsservice_db
   transactionservice:
     build: ./transaction-service
     ports:
       - 5004:5004
+    depends_on:
+      - eventbus
+      - transactionservice_db
   userservice:
     build: ./user-service
     ports:
       - 5005:5005
+    depends_on:
+      - eventbus
+      - userservice_db
