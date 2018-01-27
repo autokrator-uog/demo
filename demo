@@ -120,12 +120,12 @@ case $1 in
       echo
       echo "Commands:"
       echo
-      echo "\t${GREEN} run$NC - put all necessary docker containers up in a managed, error-free way."
-      echo "\t${GREEN} stop$NC - tear everything down"
-      echo "\t${GREEN} logs$NC - get logs from docker-compose about everything that's running"
-      echo "\t${GREEN} compose$NC - run docker compose commands - does the 5 -f args for you :)"
-      echo "\t${GREEN} restart_clients$NC - use this to kick the microservices a bit if they lost connection to the bus"
-      echo "\t${GREEN} restart_bus$NC - use this to kick the bus"
+      echo "\t${GREEN} run$NC              \t Put all necessary docker containers up in a managed, error-free way."
+      echo "\t${GREEN} stop$NC             \t Tear everything down."
+      echo "\t${GREEN} logs$NC             \t Get logs from docker-compose about everything that's running."
+      echo "\t${GREEN} compose$NC          \t Run docker compose commands easily without having to copy/paste the -f flags"
+      echo "\t${GREEN} restart_clients$NC  \t Use this to kick the microservices a bit if they lost connection to the bus."
+      echo "\t${GREEN} restart_bus$NC      \t Use this to kick the bus."
       echo
       echo
       ;;
