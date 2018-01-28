@@ -33,6 +33,7 @@ case $1 in
       
       echo "${AMBER}Building required docker images... this may take some time!$NC"
       $COMPOSE build
+      $COMPOSE pull
       ;;
   "run")
       echo "${GREEN}Starting the bare dependencies... (kafka, couchbasse, service postgres DBs)...$NC"
