@@ -10,3 +10,5 @@ services:
     command: event-bus -l debug server --bind eventbus:8081 --broker kafka:9092
   bfaf:
     build: ./bfaf
+  frontend:
+    build: ./user-interface

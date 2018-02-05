@@ -16,3 +16,6 @@
 [submodule "bfaf"]
 	path = bfaf
 	url = git@sed-team-project:SED-DEV-group/bfaf.git
+[submodule "user-interface"]
+	path = user-interface
+	url = git@sed-team-project:SED-DEV-group/user-interface.git
