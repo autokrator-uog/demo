@@ -9,6 +9,7 @@ COMPOSE="docker-compose -f demo-base.yml \
     -f transaction-service/docker-compose.yml \
     \
     -f bfaf/docker-compose.yml \
+    -f user-interface/docker-compose.yml \
     \
     -f demo-overrides.yml"
     
