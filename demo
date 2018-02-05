@@ -8,6 +8,8 @@ COMPOSE="docker-compose -f demo-base.yml \
     -f user-service/docker-compose.yml \
     -f transaction-service/docker-compose.yml \
     \
+    -f bfaf/docker-compose.yml \
+    \
     -f demo-overrides.yml"
     
 RED='\033[0;31m'

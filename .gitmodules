@@ -13,3 +13,6 @@
 [submodule "event-bus-client-lib"]
 	path = event-bus-client-lib
 	url = git@sed-team-project:SED-DEV-group/event-bus-client-lib.git
+[submodule "bfaf"]
+	path = bfaf
+	url = git@sed-team-project:SED-DEV-group/bfaf.git
