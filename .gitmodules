@@ -1,18 +1,6 @@
 [submodule "event-bus"]
 	path = event-bus
 	url = git@sed-team-project:SED-DEV-group/event-bus.git
-[submodule "accounts-service"]
-	path = accounts-service
-	url = git@sed-team-project:SED-DEV-group/accounts-service.git
-[submodule "user-service"]
-	path = user-service
-	url = git@sed-team-project:SED-DEV-group/user-service.git
-[submodule "transaction-service"]
-	path = transaction-service
-	url = git@sed-team-project:SED-DEV-group/transaction-service.git
-[submodule "event-bus-client-lib"]
-	path = event-bus-client-lib
-	url = git@sed-team-project:SED-DEV-group/event-bus-client-lib.git
 [submodule "bfaf"]
 	path = bfaf
 	url = git@sed-team-project:SED-DEV-group/bfaf.git

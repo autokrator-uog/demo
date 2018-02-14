@@ -2,23 +2,29 @@ version: '3'
 
 services:
   accountsservice:
-    build: ./accounts-service
+    build:
+      context: ./event-bus
+      dockerfile: Dockerfile.service
+    command: serviced services/account.lua -b 0.0.0.0:5003 -s ws://eventbus:8081 -r redis://redis:6379/0
     ports:
       - 5003:5003
     depends_on:
       - eventbus
-      - accountsservice_db
   transactionservice:
-    build: ./transaction-service
+    build:
+      context: ./event-bus
+      dockerfile: Dockerfile.service
+    command: serviced services/transaction.lua -b 0.0.0.0:5003 -s ws://eventbus:8081 -r redis://redis:6379/1
     ports:
       - 5004:5004
     depends_on:
       - eventbus
-      - transactionservice_db
   userservice:
-    build: ./user-service
+    build:
+      context: ./event-bus
+      dockerfile: Dockerfile.service
+    command: serviced services/user.lua -b 0.0.0.0:5003 -s ws://eventbus:8081 -r redis://redis:6379/2
     ports:
       - 5005:5005
     depends_on:
       - eventbus
-      - userservice_db
