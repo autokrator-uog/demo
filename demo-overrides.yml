@@ -4,7 +4,9 @@ services:
   couchbase.db:
     build: ./event-bus/docker/couchbase
   eventbus:
-    build: ./event-bus
+    build:
+      context: ./event-bus
+      dockerfile: Dockerfile.server
     ports:
       - 8081:8081
     command: busd -l debug server --bind eventbus:8081 --broker kafka:9092

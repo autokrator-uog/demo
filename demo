@@ -1,3 +1,4 @@
+# vim: syntax=bash
 
 COMPOSE="docker-compose -f demo-base.yml \
     \
@@ -24,10 +25,11 @@ case $1 in
       $COMPOSE build
       ;;
   "run")
-      echo "${GREEN}Starting the bare dependencies... (kafka, couchbasse, service postgres DBs)...$NC"
+      echo "${GREEN}Starting the bare dependencies... (kafka, couchbasse, redis)...$NC"
       $COMPOSE up -d \
           zookeeper kafka \
-          couchbase.db
+          couchbase.db \
+          redis
       
       secs=$((30))
       while [ $secs -gt 0 ]; do
