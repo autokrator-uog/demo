@@ -1,0 +1,264 @@
+#!/usr/bin/env python
+import argparse
+import logging
+import json
+import time
+import random
+import urllib.request
+
+logging.basicConfig(level=logging.INFO)
+
+SERVICES = {
+    'users': 'localhost:5005',
+    'transactions': 'localhost:5004',
+    'accounts': 'localhost:5003',
+}
+
+FORENAMES = [
+    'Mary', 'Patricia', 'Linda', 'Barbara', 'Elizabeth', 'Jennifer', 'Maria', 'Susan', 'Margaret',
+    'Dorothy', 'Lisa', 'Nancy', 'Karen', 'Betty', 'Helen', 'Sandra', 'Donna', 'Carol', 'Ruth',
+    'Sharon', 'Michelle', 'Laura', 'Sarah', 'Kimberly', 'Deborah', 'Jessica', 'Shirley', 'Cynthia',
+    'Angela', 'Melissa', 'Brenda', 'Amy', 'Anna', 'Rebecca', 'Virginia', 'Kathleen', 'Pamela',
+    'Martha', 'Debra', 'Amanda', 'Stephanie', 'Carolyn', 'Christine', 'Marie', 'Janet',
+    'Catherine', 'Frances', 'Ann', 'Joyce', 'Diane', 'Alice', 'Julie', 'Heather', 'Teresa',
+    'Doris', 'Gloria', 'Evelyn', 'Jean', 'Cheryl', 'Mildred', 'Katherine', 'Joan', 'Ashley',
+    'Judith', 'Rose', 'Janice', 'Kelly', 'Nicole', 'Judy', 'Christina', 'Kathy', 'Theresa',
+    'Beverly', 'Denise', 'Tammy', 'Irene', 'Jane', 'Lori', 'Rachel', 'Marilyn', 'Andrea',
+    'Kathryn', 'Louise', 'Sara', 'Anne', 'Jacqueline', 'Wanda', 'Bonnie', 'Julia', 'Ruby', 'Lois',
+    'Tina', 'Phyllis', 'Norma', 'Paula', 'Diana', 'Annie', 'Lillian', 'Emily', 'Robin', 'Peggy',
+    'Crystal', 'Gladys', 'Rita', 'Dawn', 'Connie', 'Florence', 'Tracy', 'Edna', 'Tiffany',
+    'Carmen', 'Rosa', 'Cindy', 'Grace', 'Wendy', 'Victoria', 'Edith', 'Kim', 'Sherry', 'Sylvia',
+    'Josephine', 'Thelma', 'Shannon', 'Sheila', 'Ethel', 'Ellen', 'Elaine', 'Marjorie', 'Carrie',
+    'Charlotte', 'Monica', 'Esther', 'Pauline', 'Emma', 'Juanita', 'Anita', 'Rhonda', 'Hazel',
+    'Amber', 'Eva', 'Debbie', 'April', 'Leslie', 'Clara', 'Lucille', 'Jamie', 'Joanne', 'Eleanor',
+    'Valerie', 'Danielle', 'Megan', 'Alicia', 'Suzanne', 'Michele', 'Gail', 'Bertha', 'Darlene',
+    'Veronica', 'Jill', 'Erin', 'Geraldine', 'Lauren', 'Cathy', 'Joann', 'Lorraine', 'Lynn',
+    'Sally', 'Regina', 'Erica', 'Beatrice', 'Dolores', 'Bernice', 'Audrey', 'Yvonne', 'Annette',
+    'June', 'Samantha', 'Marion', 'Dana', 'Stacy', 'Ana', 'Renee', 'Ida', 'Vivian', 'Roberta',
+    'Holly', 'Brittany', 'Melanie', 'Loretta', 'Yolanda', 'Jeanette', 'Laurie', 'Katie', 'Kristen',
+    'Vanessa', 'Alma', 'Sue', 'Elsie', 'Beth', 'Jeanne', 'James', 'John', 'Robert', 'Michael',
+    'William', 'David', 'Richard', 'Charles', 'Joseph', 'Thomas', 'Christopher', 'Daniel', 'Paul',
+    'Mark', 'Donald', 'George', 'Kenneth', 'Steven', 'Edward', 'Brian', 'Ronald', 'Anthony',
+    'Kevin', 'Jason', 'Matthew', 'Gary', 'Timothy', 'Jose', 'Larry', 'Jeffrey', 'Frank', 'Scott',
+    'Eric', 'Stephen', 'Andrew', 'Raymond', 'Gregory', 'Joshua', 'Jerry', 'Dennis', 'Walter',
+    'Patrick', 'Peter', 'Harold', 'Douglas', 'Henry', 'Carl', 'Arthur', 'Ryan', 'Roger', 'Joe',
+    'Juan', 'Jack', 'Albert', 'Jonathan', 'Justin', 'Terry', 'Gerald', 'Keith', 'Samuel', 'Willie',
+    'Ralph', 'Lawrence', 'Nicholas', 'Roy', 'Benjamin', 'Bruce', 'Brandon', 'Adam', 'Harry',
+    'Fred', 'Wayne', 'Billy', 'Steve', 'Louis', 'Jeremy', 'Aaron', 'Randy', 'Howard', 'Eugene',
+    'Carlos', 'Russell', 'Bobby', 'Victor', 'Martin', 'Ernest', 'Phillip', 'Todd', 'Jesse',
+    'Craig', 'Alan', 'Shawn', 'Clarence', 'Sean', 'Philip', 'Chris', 'Johnny', 'Earl', 'Jimmy',
+    'Antonio', 'Danny', 'Bryan', 'Tony', 'Luis', 'Mike', 'Stanley', 'Leonard', 'Nathan', 'Dale',
+    'Manuel', 'Rodney', 'Curtis', 'Norman', 'Allen', 'Marvin', 'Vincent', 'Glenn', 'Jeffery',
+    'Travis', 'Jeff', 'Chad', 'Jacob', 'Lee', 'Melvin', 'Alfred', 'Kyle', 'Francis', 'Bradley',
+    'Jesus', 'Herbert', 'Frederick', 'Ray', 'Joel', 'Edwin', 'Don', 'Eddie', 'Ricky', 'Troy',
+    'Randall', 'Barry', 'Alexander', 'Bernard', 'Mario', 'Leroy', 'Francisco', 'Marcus', 'Micheal',
+    'Theodore', 'Clifford', 'Miguel', 'Oscar', 'Jay', 'Jim', 'Tom', 'Calvin', 'Alex', 'Jon',
+    'Ronnie', 'Bill', 'Lloyd', 'Tommy', 'Leon', 'Derek', 'Warren', 'Darrell', 'Jerome', 'Floyd',
+    'Leo', 'Alvin', 'Tim', 'Wesley', 'Gordon', 'Dean', 'Greg', 'Jorge', 'Dustin', 'Pedro',
+    'Derrick', 'Dan', 'Lewis', 'Zachary', 'Corey', 'Herman', 'Maurice', 'Vernon', 'Roberto',
+    'Clyde', 'Glen', 'Hector', 'Shane', 'Ricardo', 'Sam', 'Rick', 'Lester', 'Brent', 'Ramon',
+    'Charlie', 'Tyler', 'Gilbert', 'Gene',
+]
+
+SURNAMES = [
+    'Smith', 'Johnson', 'Williams', 'Jones', 'Brown', 'Davis', 'Miller', 'Wilson', 'Moore',
+    'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin', 'Thompson',
+    'Garcia', 'Martinez', 'Robinson', 'Clark', 'Rodriguez', 'Lewis', 'Lee', 'Walker', 'Hall',
+    'Allen', 'Young', 'Hernandez', 'King', 'Wright', 'Lopez', 'Hill', 'Scott', 'Green', 'Adams',
+    'Baker', 'Gonzalez', 'Nelson', 'Carter', 'Mitchell', 'Perez', 'Roberts', 'Turner', 'Phillips',
+    'Campbell', 'Parker', 'Evans', 'Edwards', 'Collins', 'Stewart', 'Sanchez', 'Morris', 'Rogers',
+    'Reed', 'Cook', 'Morgan', 'Bell', 'Murphy', 'Bailey', 'Rivera', 'Cooper', 'Richardson', 'Cox',
+    'Howard', 'Ward', 'Torres', 'Peterson', 'Gray', 'Ramirez', 'James', 'Watson', 'Brooks',
+    'Kelly', 'Sanders', 'Price', 'Bennett', 'Wood', 'Barnes', 'Ross', 'Henderson', 'Coleman',
+    'Jenkins', 'Perry', 'Powell', 'Long', 'Patterson', 'Hughes', 'Flores', 'Washington', 'Butler',
+    'Simmons', 'Foster', 'Gonzales', 'Bryant', 'Alexander', 'Russell', 'Griffin', 'Diaz', 'Hayes',
+    'Myers', 'Ford', 'Hamilton', 'Graham', 'Sullivan', 'Wallace', 'Woods', 'Cole', 'West',
+    'Jordan', 'Owens', 'Reynolds', 'Fisher', 'Ellis', 'Harrison', 'Gibson', 'McDonald', 'Cruz',
+    'Marshall', 'Ortiz', 'Gomez', 'Murray', 'Freeman', 'Wells', 'Webb', 'Simpson', 'Stevens',
+    'Tucker', 'Porter', 'Hunter', 'Hicks', 'Crawford', 'Henry', 'Boyd', 'Mason', 'Morales',
+    'Kennedy', 'Warren', 'Dixon', 'Ramos', 'Reyes', 'Burns', 'Gordon', 'Shaw', 'Holmes', 'Rice',
+    'Robertson', 'Hunt', 'Black', 'Daniels', 'Palmer', 'Mills', 'Nichols', 'Grant', 'Knight',
+    'Ferguson', 'Rose', 'Stone', 'Hawkins', 'Dunn', 'Perkins', 'Hudson', 'Spencer', 'Gardner',
+    'Stephens', 'Payne', 'Pierce', 'Berry', 'Matthews', 'Arnold', 'Wagner', 'Willis', 'Ray',
+    'Watkins', 'Olson', 'Carroll', 'Duncan', 'Snyder', 'Hart', 'Cunningham', 'Bradley', 'Lane',
+    'Andrews', 'Ruiz', 'Harper', 'Fox', 'Riley', 'Armstrong', 'Carpenter', 'Weaver', 'Greene',
+    'Lawrence', 'Elliott', 'Chavez', 'Sims', 'Austin', 'Peters', 'Kelley', 'Franklin', 'Lawson',
+    'Fields', 'Gutierrez', 'Ryan', 'Schmidt', 'Carr', 'Vasquez', 'Castillo', 'Wheeler', 'Chapman',
+    'Oliver', 'Montgomery', 'Richards', 'Williamson', 'Johnston', 'Banks', 'Meyer', 'Bishop',
+    'McCoy', 'Howell', 'Alvarez', 'Morrison', 'Hansen', 'Fernandez', 'Garza', 'Harvey', 'Little',
+    'Burton', 'Stanley', 'Nguyen', 'George', 'Jacobs', 'Reid', 'Kim', 'Fuller', 'Lynch', 'Dean',
+    'Gilbert', 'Garrett', 'Romero', 'Welch', 'Larson', 'Frazier', 'Burke', 'Hanson', 'Day',
+    'Mendoza', 'Moreno', 'Bowman', 'Medina', 'Fowler', 'Brewer', 'Hoffman', 'Carlson', 'Silva',
+    'Pearson', 'Holland', 'Douglas', 'Fleming', 'Jensen', 'Vargas', 'Byrd', 'Davidson', 'Hopkins',
+    'May', 'Terry', 'Herrera', 'Wade', 'Soto', 'Walters', 'Curtis', 'Neal', 'Caldwell', 'Lowe',
+    'Jennings', 'Barnett', 'Graves', 'Jimenez', 'Horton', 'Shelton', 'Barrett', 'O\'brien', 'Castro',
+    'Sutton', 'Gregory', 'McKinney', 'Lucas', 'Miles', 'Craig', 'Rodriquez', 'Chambers', 'Holt',
+    'Lambert', 'Fletcher', 'Watts', 'Bates', 'Hale', 'Rhodes', 'Pena', 'Beck', 'Newman', 'Haynes',
+    'McDaniel', 'Mendez', 'Bush', 'Vaughn', 'Parks', 'Dawson', 'Santiago', 'Norris', 'Hardy',
+    'Love', 'Steele', 'Curry', 'Powers', 'Schultz', 'Barker', 'Guzman', 'Page', 'Munoz',
+    'Ball', 'Keller', 'Chandler', 'Weber', 'Leonard', 'Walsh', 'Lyons', 'Ramsey', 'Wolfe',
+    'Schneider', 'Mullins', 'Benson', 'Sharp', 'Bowen', 'Daniel', 'Barber', 'Cummings', 'Hines',
+    'Baldwin', 'Griffith', 'Valdez', 'Hubbard', 'Salazar', 'Reeves', 'Warner', 'Stevenson',
+    'Burgess', 'Santos', 'Tate', 'Cross', 'Garner', 'Mann', 'Mack', 'Moss', 'Thornton', 'Dennis',
+    'McGee', 'Farmer', 'Delgado', 'Aguilar', 'Vega', 'Glover', 'Manning', 'Cohen', 'Harmon',
+    'Rodgers', 'Robbins', 'Newton', 'Todd', 'Blair', 'Higgins', 'Ingram', 'Reese', 'Cannon',
+    'Strickland', 'Townsend', 'Potter', 'Goodwin', 'Walton', 'Rowe', 'Hampton', 'Ortega', 'Patton',
+    'Swanson', 'Joseph', 'Francis', 'Goodman', 'Maldonado', 'Yates', 'Becker', 'Erickson',
+    'Hodges', 'Rios', 'Conner', 'Adkins', 'Webster', 'Norman', 'Malone', 'Hammond', 'Flowers',
+    'Cobb', 'Moody', 'Quinn', 'Blake', 'Maxwell', 'Pope', 'Floyd', 'Osborne', 'Paul', 'McCarthy',
+    'Guerrero', 'Lindsey', 'Estrada', 'Sandoval', 'Gibbs', 'Tyler', 'Gross', 'Fitzgerald',
+    'Stokes', 'Doyle', 'Sherman', 'Saunders', 'Wise', 'Colon', 'Gill', 'Alvarado', 'Greer',
+    'Padilla', 'Simon', 'Waters',
+]
+
+
+def gen_name():
+    return random.choice(FORENAMES).title() + random.choice(SURNAMES).title()
+
+
+def send_request(service, method, path, data):
+    kwargs = {
+        'url': 'http://{}{}'.format(SERVICES[service], path),
+        'method': method,
+    }
+
+    if method == 'POST':
+        encoded_data = json.dumps(data).encode('utf-8')
+        headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+
+        kwargs['data'] = encoded_data
+        kwargs['headers'] = headers
+
+    req = urllib.request.Request(**kwargs)
+    with urllib.request.urlopen(req) as f:
+        return json.loads(f.read().decode('utf-8'))
+
+
+def create_user(name):
+    logging.info('create user: name=%s', name)
+    return send_request('users', 'POST', '/user', { 'username': name })
+
+
+def create_account(name):
+    logging.info('create account: name=%s', name)
+    return send_request('users', 'POST', '/user/{}'.format(name), {})
+
+
+def get_accounts(name):
+    logging.info('get accounts: name=%s', name)
+    return send_request('users', 'GET', '/user/{}'.format(name), {})
+
+
+def deposit(acc_id, amount):
+    logging.info('deposit: id=%d amount=%d', acc_id, amount)
+    return send_request('accounts', 'POST', '/account/{}/deposit'.format(acc_id), {
+        'amount': amount,
+    })
+
+
+def withdrawal(acc_id, amount):
+    logging.info('withdrawal: id=%d amount=%d', acc_id, amount)
+    return send_request('accounts', 'POST', '/account/{}/withdrawal'.format(acc_id), {
+        'amount': amount,
+    })
+
+
+def transaction(from_acc, to_acc, amount):
+    return send_request('transactions', 'POST', '/createTransaction', {
+        'fromAccountId': from_acc,
+        'toAccountId': to_acc,
+        'amount': amount
+    })
+
+
+def populate(args):
+    # Create the users and accounts.
+    users = []
+    for u in range(random.randint(args.min_users, args.max_users)):
+        name = gen_name()
+        create_user(name)
+        logging.info('creating user: num=%d name=%s', u, name)
+
+        for a in range(random.randint(args.min_accounts, args.max_accounts)):
+            logging.info('creating account: num=%d name=%s', a, name)
+            create_account(name)
+
+        users.append({ 'name': name })
+
+    # Wait for account creations.
+    time.sleep(5)
+
+    # Get account ids
+    logging.info('fetching account ids')
+    for user in users:
+        details = get_accounts(user['name'])
+        logging.info('found accounts for user: name=%s accounts=%s',
+                     user['name'], details['accounts'])
+        user['accounts'] = details['accounts']
+
+    # Normal operations only operate on the small scale, that ensures that we don't need to worry
+    # about transactions or withdrawals being rejected during population.
+    SMALL_MIN = 10
+    SMALL_MAX = 50
+    LARGE_MIN = 10000
+    LARGE_MAX = 50000
+
+    # Create initial deposits
+    logging.info('creating initial account deposits')
+    for user in users:
+        for account in user['accounts']:
+            deposit(account, random.randint(LARGE_MIN, LARGE_MAX))
+
+    # Wait for deposits.
+    time.sleep(5)
+
+    OPERATIONS = [ 'deposit', 'withdrawal', 'transact' ]
+
+    # Run some random operations.
+    logging.info('running random ops')
+    for user in users:
+        logging.info('running random ops for user: name=%s', user)
+        for account in user['accounts']:
+            logging.info('running random ops for account: name=%s id=%d', user, account)
+            for o in range(random.randint(args.min_operations, args.max_operations)):
+                logging.info('running random ops for account: op=%s name=%s id=%d',
+                             o, user, account)
+                op = random.choice(OPERATIONS)
+                if op == 'deposit':
+                    logging.info('running deposit op for account: name=%s id=%d', user, account)
+                    deposit(account, random.randint(SMALL_MIN, SMALL_MAX))
+                elif op == 'withdrawal':
+                    logging.info('running withdrawal op for account: name=%s id=%d', user, account)
+                    withdrawal(account, random.randint(SMALL_MIN, SMALL_MAX))
+                elif op == 'transact':
+                    other_user = random.choice(users)
+                    other_acc = random.choice(other_user['accounts'])
+                    logging.info('running transact op for account: '\
+                                 'from_name=%s from_id=%d to_name=%s to_id=%d',
+                                 user, account, other_user, other_acc)
+                    transaction(account, other_acc, random.randint(SMALL_MIN, SMALL_MAX))
+
+    # Print information so that we know what accounts exist.
+    for user in users:
+        print('User: {}\nAccounts: {}\n\n'.format(user['name'], user['accounts']))
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Populate platform with demo data')
+    parser.add_argument('--min-users', type=int, help='min no. of users to create',
+                        default=1)
+    parser.add_argument('--max-users', type=int, help='max no. of users to create',
+                        default=10)
+    parser.add_argument('--min-accounts', type=int,
+                        help='min no. of accounts to create (per user)', default=1)
+    parser.add_argument('--max-accounts', type=int,
+                        help='max no. of accounts to create (per user)', default=5)
+    parser.add_argument('--min-operations', type=int,
+                        help='min no. of deposit/withdrawal/transactions to simulate (per acc)',
+                        default=2)
+    parser.add_argument('--max-operations', type=int,
+                        help='max no. of deposit/withdrawal/transactions to simulate (per acc)',
+                        default=10)
+    args = parser.parse_args()
+
+    populate(args)
