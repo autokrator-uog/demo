@@ -1,5 +1,4 @@
-# vim: syntax=bash
-
+#!/usr/bin/env bash
 COMPOSE="docker-compose -f demo-base.yml \
     \
     -f event-bus/docker/base.yml \
@@ -9,80 +8,80 @@ COMPOSE="docker-compose -f demo-base.yml \
     -f user-interface/docker-compose.yml \
     \
     -f demo-overrides.yml"
-    
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-AMBER='\033[0;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
 
-case $1 in 
+RED='\x1B[0;31m'
+GREEN='\x1B[0;32m'
+AMBER='\x1B[0;33m'
+BLUE='\x1B[0;34m'
+NC='\x1B[0m' # No Color
+
+case $1 in
   "setup")
-      echo "${AMBER}Pulling required docker images...$NC"
+      echo -e "${AMBER}Pulling required docker images...$NC"
       $COMPOSE pull
-      
-      echo "${AMBER}Building required docker images... this may take some time!$NC"
+
+      echo -e "${AMBER}Building required docker images... this may take some time!$NC"
       $COMPOSE build
       ;;
   "run")
-      echo "${GREEN}Starting the bare dependencies... (kafka, couchbasse, redis)...$NC"
+      echo -e "${GREEN}Starting the bare dependencies... (kafka, couchbase, redis)...$NC"
       $COMPOSE up -d \
           zookeeper kafka \
           couchbase.db \
           redis
-      
+
       secs=$((30))
       while [ $secs -gt 0 ]; do
-         echo "Waiting for ${BLUE}dependencies$NC to spool up sufficiently... $GREEN$secs$NC seconds remaining"
+         echo -e "Waiting for ${BLUE}dependencies$NC to spool up sufficiently... $GREEN$secs$NC seconds remaining"
          sleep 1
          : $((secs--))
       done
-      
-      echo
-      echo
-      echo "${GREEN}Starting the event bus...$NC"
+
+      echo -e
+      echo -e
+      echo -e "${GREEN}Starting the event bus...$NC"
       $COMPOSE up -d eventbus
-      
+
       secs=$((15))
       while [ $secs -gt 0 ]; do
-         echo "Waiting for ${BLUE}event bus$NC to spool up sufficiently... $GREEN$secs$NC seconds remaining"
+         echo -e "Waiting for ${BLUE}event bus$NC to spool up sufficiently... $GREEN$secs$NC seconds remaining"
          sleep 1
          : $((secs--))
       done
-      
-      echo
-      echo
-      echo "${GREEN}Starting everything else... microservices/bfaf$NC"
+
+      echo -e
+      echo -e
+      echo -e "${GREEN}Starting everything else... microservices/bfaf$NC"
       $COMPOSE up -d
-      
+
       secs=$((10))
       while [ $secs -gt 0 ]; do
-         echo "Waiting for ${BLUE}everything$NC to spool up sufficiently... $GREEN$secs$NC seconds remaining"
+         echo -e "Waiting for ${BLUE}everything$NC to spool up sufficiently... $GREEN$secs$NC seconds remaining"
          sleep 1
          : $((secs--))
       done
-      echo
-      echo
-      echo "==================="
-      echo
-      echo "${GREEN}Services state:$NC"
-      echo
+      echo -e
+      echo -e
+      echo -e "==================="
+      echo -e
+      echo -e "${GREEN}Services state:$NC"
+      echo -e
       $COMPOSE ps
-      echo
-      echo "${AMBER}Please investigate if there are any services not 'Up' in the above list!$NC"
-      echo
-      echo 
+      echo -e
+      echo -e "${AMBER}Please investigate if there are any services not 'Up' in the above list!$NC"
+      echo -e
+      echo -e
       ;;
   "stop")
-      echo "${AMBER}Stopping....$NC"
+      echo -e "${AMBER}Stopping....$NC"
       $COMPOSE down
-      echo "${GREEN}Stopped....$NC"
+      echo -e "${GREEN}Stopped....$NC"
       ;;
   "logs")
       clear
-      echo "${GREEN}Starting stream of logs....$NC"
+      echo -e "${GREEN}Starting stream of logs....$NC"
       sleep 1
-      
+
       $COMPOSE logs -f
       ;;
   "compose")
@@ -90,33 +89,35 @@ case $1 in
       eval "$COMPOSE $@"
       ;;
   "restart_clients")
-      echo "${AMBER}Restarting Accounts Service....$NC"
+      echo -e "${AMBER}Restarting Accounts Service....$NC"
       $COMPOSE restart accountsservice
-      
-      echo "${AMBER}Restarting Transaction Service....$NC"
+
+      echo -e "${AMBER}Restarting Transaction Service....$NC"
       $COMPOSE restart transactionservice
-      
-      echo "${AMBER}Restarting User Service....$NC"
+
+      echo -e "${AMBER}Restarting User Service....$NC"
       $COMPOSE restart userservice
       ;;
   "restart_bus")
-      echo "${RED}Restarting event bus...$NC"
+      echo -e "${RED}Restarting event bus...$NC"
       $COMPOSE restart eventbus
       ;;
   *)
-      echo "${RED}================="
-      echo
-      echo "${GREEN}Welcome to SED Event Bus Demo!$NC"
-      echo
-      echo "Commands:"
-      echo
-      echo "\t${GREEN} run$NC              \t Put all necessary docker containers up in a managed, error-free way."
-      echo "\t${GREEN} stop$NC             \t Tear everything down."
-      echo "\t${GREEN} logs$NC             \t Get logs from docker-compose about everything that's running."
-      echo "\t${GREEN} compose$NC          \t Run docker compose commands easily without having to copy/paste the -f flags"
-      echo "\t${GREEN} restart_clients$NC  \t Use this to kick the microservices a bit if they lost connection to the bus."
-      echo "\t${GREEN} restart_bus$NC      \t Use this to kick the bus."
-      echo
-      echo
+      echo -e "${RED}================="
+      echo -e
+      echo -e "${GREEN}Welcome to SED Event Bus Demo!$NC"
+      echo -e
+      echo -e "Commands:"
+      echo -e
+      echo -e "\t${GREEN} run$NC              \t Put all necessary docker containers up in a managed, error-free way."
+      echo -e "\t${GREEN} stop$NC             \t Tear everything down."
+      echo -e "\t${GREEN} logs$NC             \t Get logs from docker-compose about everything that's running."
+      echo -e "\t${GREEN} compose$NC          \t Run docker compose commands easily without having to copy/paste the -f flags"
+      echo -e "\t${GREEN} restart_clients$NC  \t Use this to kick the microservices a bit if they lost connection to the bus."
+      echo -e "\t${GREEN} restart_bus$NC      \t Use this to kick the bus."
+      echo -e
+      echo -e
       ;;
 esac
+
+# vim: ft=sh
