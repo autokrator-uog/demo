@@ -4,7 +4,12 @@ import logging
 import json
 import time
 import random
-import urllib.request
+try:
+    from urllib.request import urlopen, Request
+    PY2 = False
+except ImportError:
+    from urllib2 import urlopen, Request
+    PY2 = True
 
 logging.basicConfig(level=logging.INFO)
 
@@ -119,8 +124,10 @@ def gen_name():
 def send_request(service, method, path, data):
     kwargs = {
         'url': 'http://{}{}'.format(SERVICES[service], path),
-        'method': method,
     }
+
+    if not PY2:
+        kwargs['method'] = method
 
     if method == 'POST':
         encoded_data = json.dumps(data).encode('utf-8')
@@ -129,9 +136,9 @@ def send_request(service, method, path, data):
         kwargs['data'] = encoded_data
         kwargs['headers'] = headers
 
-    req = urllib.request.Request(**kwargs)
-    with urllib.request.urlopen(req) as f:
-        return json.loads(f.read().decode('utf-8'))
+    req = Request(**kwargs)
+    resp = urlopen(req)
+    return json.loads(resp.read().decode('utf-8'))
 
 
 def create_user(name):
