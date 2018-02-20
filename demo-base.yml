@@ -1,30 +1,60 @@
 version: '3'
 
 services:
+  accounts_proxy:
+    image: eeacms/haproxy
+    depends_on:
+      - accountsservice
+    ports:
+      - 5003:5000
+      - 1936:1936
+    environment:
+      BACKENDS: "accountsservice:8080"
+      DNS_ENABLED: "true"
+      HTTPCHK: "HEAD /health_check"
+      LOG_LEVEL: "info"
   accountsservice:
     build:
       context: ./event-bus
       dockerfile: Dockerfile.service
-    command: serviced services/account.lua -b 0.0.0.0:5003 -s ws://eventbus:8081 -r redis://redis:6379/0
-    ports:
-      - 5003:5003
+    command: serviced services/account.lua -b 0.0.0.0:8080 -s ws://eventbus:8081 -r redis://redis:6379/0
     depends_on:
       - eventbus
+  transaction_proxy:
+    image: eeacms/haproxy
+    depends_on:
+      - transactionservice
+    ports:
+      - 5004:5000
+      - 1937:1936
+    environment:
+      BACKENDS: "transactionservice:8080"
+      DNS_ENABLED: "true"
+      HTTPCHK: "HEAD /health_check"
+      LOG_LEVEL: "info"
   transactionservice:
     build:
       context: ./event-bus
       dockerfile: Dockerfile.service
-    command: serviced services/transaction.lua -b 0.0.0.0:5004 -s ws://eventbus:8081 -r redis://redis:6379/1
-    ports:
-      - 5004:5004
+    command: serviced services/transaction.lua -b 0.0.0.0:8080 -s ws://eventbus:8081 -r redis://redis:6379/1
     depends_on:
       - eventbus
+  user_proxy:
+    image: eeacms/haproxy
+    depends_on:
+      - userservice
+    ports:
+      - 5005:5000
+      - 1938:1936
+    environment:
+      BACKENDS: "userservice:8080"
+      DNS_ENABLED: "true"
+      HTTPCHK: "HEAD /health_check"
+      LOG_LEVEL: "info"
   userservice:
     build:
       context: ./event-bus
       dockerfile: Dockerfile.service
-    command: serviced services/user.lua -b 0.0.0.0:5005 -s ws://eventbus:8081 -r redis://redis:6379/2
-    ports:
-      - 5005:5005
+    command: serviced services/user.lua -b 0.0.0.0:8080 -s ws://eventbus:8081 -r redis://redis:6379/2
     depends_on:
       - eventbus
