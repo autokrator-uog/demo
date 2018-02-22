@@ -58,3 +58,10 @@ services:
     command: serviced services/user.lua -b 0.0.0.0:8080 -s ws://eventbus:8081 -r redis://redis:6379/2
     depends_on:
       - eventbus
+  admin_ui:
+    image: portainer/portainer
+    volumes:
+      - /data
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 9000:9000
