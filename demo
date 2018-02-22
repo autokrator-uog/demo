@@ -24,6 +24,9 @@ case $1 in
       $COMPOSE build
       ;;
   "run")
+      echo -e "${GREEN}Starting the Admin UI...$NC"
+      $COMPOSE up -d admin_ui
+      
       echo -e "${GREEN}Starting the bare dependencies... (kafka, couchbase, redis)...$NC"
       $COMPOSE up -d \
           zookeeper kafka \
