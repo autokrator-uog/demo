@@ -7,3 +7,6 @@
 [submodule "user-interface"]
 	path = user-interface
 	url = git@sed-team-project:SED-DEV-group/user-interface.git
+[submodule "jackie"]
+	path = jackie
+	url = git@sed-team-project:SED-DEV-group/jackie.git

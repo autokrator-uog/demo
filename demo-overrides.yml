@@ -14,3 +14,5 @@ services:
     build: ./bfaf
   frontend:
     build: ./user-interface
+  jackie:
+    build: ./jackie

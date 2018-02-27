@@ -7,6 +7,8 @@ COMPOSE="docker-compose -f demo-base.yml \
     -f bfaf/docker-compose.yml \
     -f user-interface/docker-compose.yml \
     \
+    -f jackie/docker-compose.yml \
+    \
     -f demo-overrides.yml"
 
 RED='\x1B[0;31m'
