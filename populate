@@ -11,8 +11,6 @@ except ImportError:
     from urllib2 import urlopen, Request
     PY2 = True
 
-logging.basicConfig(level=logging.INFO)
-
 SERVICES = {
     'users': 'localhost:5005',
     'transactions': 'localhost:5004',
@@ -118,7 +116,7 @@ SURNAMES = [
 
 
 def gen_name():
-    return random.choice(FORENAMES).title() + random.choice(SURNAMES).title()
+    return random.choice(FORENAMES) + random.choice(SURNAMES)
 
 
 def send_request(service, method, path, data):
@@ -141,30 +139,30 @@ def send_request(service, method, path, data):
     return json.loads(resp.read().decode('utf-8'))
 
 
-def create_user(name):
-    logging.info('create user: name=%s', name)
+def create_user(index, name):
+    print('Creating user: num={} name={}'.format(index, name))
     return send_request('users', 'POST', '/user', { 'username': name })
 
 
-def create_account(name):
-    logging.info('create account: name=%s', name)
+def create_account(index, name):
+    print('Creating account: num={} name={}'.format(index, name))
     return send_request('users', 'POST', '/user/{}'.format(name), {})
 
 
 def get_accounts(name):
-    logging.info('get accounts: name=%s', name)
+    print('Get accounts: name={}'.format(name))
     return send_request('users', 'GET', '/user/{}'.format(name), {})
 
 
 def deposit(acc_id, amount):
-    logging.info('deposit: id=%d amount=%d', acc_id, amount)
+    print('Deposit: id={} amount={}'.format(acc_id, amount))
     return send_request('accounts', 'POST', '/account/{}/deposit'.format(acc_id), {
         'amount': amount,
     })
 
 
 def withdrawal(acc_id, amount):
-    logging.info('withdrawal: id=%d amount=%d', acc_id, amount)
+    print('Withdrawal: id={} amount={}'.format(acc_id, amount))
     return send_request('accounts', 'POST', '/account/{}/withdrawal'.format(acc_id), {
         'amount': amount,
     })
@@ -183,12 +181,10 @@ def populate(args):
     users = []
     for u in range(random.randint(args.min_users, args.max_users)):
         name = gen_name()
-        create_user(name)
-        logging.info('creating user: num=%d name=%s', u, name)
+        create_user(u, name)
 
         for a in range(random.randint(args.min_accounts, args.max_accounts)):
-            logging.info('creating account: num=%d name=%s', a, name)
-            create_account(name)
+            create_account(a, name)
 
         users.append({ 'name': name })
 
@@ -196,11 +192,11 @@ def populate(args):
     time.sleep(5)
 
     # Get account ids
-    logging.info('fetching account ids')
+    print('\nFetching account ids')
     for user in users:
         details = get_accounts(user['name'])
-        logging.info('found accounts for user: name=%s accounts=%s',
-                     user['name'], details['accounts'])
+        print('Found accounts for user: name={} accounts={}'.format(
+            user['name'], details['accounts']))
         user['accounts'] = details['accounts']
 
     # Normal operations only operate on the small scale, that ensures that we don't need to worry
@@ -211,7 +207,7 @@ def populate(args):
     LARGE_MAX = 50000
 
     # Create initial deposits
-    logging.info('creating initial account deposits')
+    print('\nCreating initial account deposits')
     for user in users:
         for account in user['accounts']:
             deposit(account, random.randint(LARGE_MIN, LARGE_MAX))
@@ -222,32 +218,35 @@ def populate(args):
     OPERATIONS = [ 'deposit', 'withdrawal', 'transact' ]
 
     # Run some random operations.
-    logging.info('running random ops')
+    print('\nRunning random operations')
     for user in users:
-        logging.info('running random ops for user: name=%s', user)
+        print('Running random operations for user: name={}'.format(user['name']))
         for account in user['accounts']:
-            logging.info('running random ops for account: name=%s id=%d', user, account)
+            print('Running random operations for account: name={} id={}'.format(
+                user['name'], account))
             for o in range(random.randint(args.min_operations, args.max_operations)):
-                logging.info('running random ops for account: op=%s name=%s id=%d',
-                             o, user, account)
+                print('Running random operations for account: op={} name={} id={}'.format(
+                    o, user['name'], account))
                 op = random.choice(OPERATIONS)
                 if op == 'deposit':
-                    logging.info('running deposit op for account: name=%s id=%d', user, account)
+                    print('Running deposit operation for account: name={} id={}'.format(
+                        user['name'], account))
                     deposit(account, random.randint(SMALL_MIN, SMALL_MAX))
                 elif op == 'withdrawal':
-                    logging.info('running withdrawal op for account: name=%s id=%d', user, account)
+                    print('Running withdrawal operation for account: name={} id={}'.format(
+                        user['name'], account))
                     withdrawal(account, random.randint(SMALL_MIN, SMALL_MAX))
                 elif op == 'transact':
                     other_user = random.choice(users)
                     other_acc = random.choice(other_user['accounts'])
-                    logging.info('running transact op for account: '\
-                                 'from_name=%s from_id=%d to_name=%s to_id=%d',
-                                 user, account, other_user, other_acc)
+                    print('Running transact operation for account: '
+                          'from_name={} from_id={} to_name={} to_id={}'.format(
+                              user['name'], account, other_user['name'], other_acc))
                     transaction(account, other_acc, random.randint(SMALL_MIN, SMALL_MAX))
 
     # Print information so that we know what accounts exist.
     for user in users:
-        print('User: {}\nAccounts: {}\n\n'.format(user['name'], user['accounts']))
+        print('\nUser: {}\nAccounts: {}'.format(user['name'], user['accounts']))
 
 
 if __name__ == '__main__':
