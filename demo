@@ -53,15 +53,29 @@ case $1 in
          sleep 1
          : $((secs--))
       done
+      
+      
+      echo -e
+      echo -e
+      echo -e "${GREEN}Starting microservices...$NC"
+      $COMPOSE up -d accountsservice transactionservice userservice
+      
+      
+      secs=$((10))
+      while [ $secs -gt 0 ]; do
+         echo -e "Waiting for ${BLUE}microservices$NC to spool up sufficiently... $GREEN$secs$NC seconds remaining"
+         sleep 1
+         : $((secs--))
+      done
 
       echo -e
       echo -e
-      echo -e "${GREEN}Starting everything else... microservices/bfaf$NC"
+      echo -e "${GREEN}Starting everything else... bfaf/jackie/etc$NC"
       $COMPOSE up -d
 
       secs=$((10))
       while [ $secs -gt 0 ]; do
-         echo -e "Waiting for ${BLUE}everything$NC to spool up sufficiently... $GREEN$secs$NC seconds remaining"
+         echo -e "Waiting for ${BLUE}everything else$NC to spool up sufficiently... $GREEN$secs$NC seconds remaining"
          sleep 1
          : $((secs--))
       done
