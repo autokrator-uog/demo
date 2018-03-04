@@ -1,13 +1,10 @@
 # Demo
+This repository contains submodules for each of the various in-use repositories and takes advantage of the Docker containers of each to provide a simple way to start the entire application.
 
-This repo is for demonstrating the full finished project.
+## How to run
+In order to run the full application, follow the following steps:
 
-## Setup
+  1. Clone this repository with the `--recursive` flag to ensure that all submodules are also cloned.
+  2. Run `./demo setup` - this may take some time if you're building from scratch.
 
-Git clone this repo with the `--recursive` flag to get all the submodules cloned.
-
-Run `./demo setup` - this may take some time if you're building from scratch.
-
-## Actions
-
-Run `./demo` for an explanation of available commands.
+Further management of the running application can be achieved through use of the `./demo` script - run `./demo` for an explanation of available commands.
