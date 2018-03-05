@@ -1,12 +1,12 @@
 [submodule "event-bus"]
 	path = event-bus
-	url = git@sed-team-project:SED-DEV-group/event-bus.git
+	url = git@gitlab.com:autokrator-uog/core.git
 [submodule "bfaf"]
 	path = bfaf
-	url = git@sed-team-project:SED-DEV-group/bfaf.git
+	url = git@gitlab.com:autokrator-uog/backend.git
 [submodule "user-interface"]
 	path = user-interface
-	url = git@sed-team-project:SED-DEV-group/user-interface.git
+	url = git@gitlab.com:autokrator-uog/user-interface.git
 [submodule "jackie"]
 	path = jackie
-	url = git@sed-team-project:SED-DEV-group/jackie.git
+	url = git@gitlab.com:autokrator-uog/reporting-service.git
